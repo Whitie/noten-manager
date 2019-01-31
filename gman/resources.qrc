@@ -1,0 +1,20 @@
+<RCC>
+  <qresource prefix="icons">
+    <file alias="new.png">theme/new.png</file>
+    <file alias="remove.png">theme/remove.png</file>
+    <file alias="add.png">theme/add.png</file>
+    <file alias="course.png">theme/course.png</file>
+    <file alias="student.png">theme/student.png</file>
+    <file alias="top.png">theme/top.png</file>
+    <file alias="group.png">theme/group.png</file>
+    <file alias="app.png">theme/app.png</file>
+    <file alias="save.png">theme/save.png</file>
+    <file alias="course-new.png">theme/course-new.png</file>
+    <file alias="group-new.png">theme/group-new.png</file>
+    <file alias="practice.png">theme/practice.png</file>
+    <file alias="theory.png">theme/theory.png</file>
+    <file alias="warning.png">theme/warning.png</file>
+    <file alias="db-new.png">theme/db-new.png</file>
+    <file alias="db-open.png">theme/db-open.png</file>
+  </qresource>
+</RCC>
