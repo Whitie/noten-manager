@@ -2,7 +2,7 @@
 
 import sqlalchemy as sa
 
-from datetime import datetime, date
+from datetime import datetime
 from getpass import getuser
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, sessionmaker
@@ -103,6 +103,7 @@ class Student(Base):
     @property
     def fullname(self):
         return '{}, {}'.format(self.last_name, self.first_name)
+
 
 class Experiment(Base):
     __tablename__ = 'experiments'

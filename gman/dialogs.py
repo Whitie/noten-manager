@@ -20,7 +20,7 @@ class CourseDialog(QtWidgets.QDialog):
         for course in courses:
             self.courselist.addItem(QtWidgets.QListWidgetItem(course.title))
         self.courselist.itemDoubleClicked.connect(self.item_selected)
-    
+
     def item_selected(self, item):
         text = item.text()
         self.parent().title.setText(text)

@@ -30,14 +30,14 @@ class GradeManagerMain(QtWidgets.QMainWindow):
         self._check_available_actions()
         self.nav.itemClicked.connect(self.item_clicked)
         self.nav.customContextMenuRequested.connect(self.item_right_clicked)
-    
+
     def _connect_actions(self):
         self.action_new_db.triggered.connect(self.create_new_db)
         self.action_open_db.triggered.connect(self.open_db)
         self.action_add_students.triggered.connect(self.add_students)
         self.action_companies.triggered.connect(self.edit_companies)
         self.action_new_course.triggered.connect(self.new_course)
-    
+
     def _check_available_actions(self):
         self.action_add_students.setEnabled(self.db_connected)
         self.action_new_course.setEnabled(self.db_connected)
@@ -52,7 +52,7 @@ class GradeManagerMain(QtWidgets.QMainWindow):
         s = self.Session()
         q = s.query(db.Course)
         return bool(q.count())
-    
+
     @property
     def has_students(self):
         if not self.db_connected:
@@ -82,7 +82,7 @@ class GradeManagerMain(QtWidgets.QMainWindow):
         widget = widgets.StudentsWidget(UI_PATH, self.status, self.Session(),
                                         count)
         win.setWidget(widget)
-        win.setWindowIcon(QtGui.QIcon(':/icons/group-new.png'))
+        win.setWindowIcon(QtGui.QIcon(':/icons/group-new'))
         self.main.addSubWindow(win)
         self.subwindows['students'] = win
         win.show()
@@ -96,7 +96,7 @@ class GradeManagerMain(QtWidgets.QMainWindow):
             dbfile = dbfile[0]
             if os.path.isfile(dbfile):
                 self.load_db(dbfile)
-    
+
     def load_db(self, dbfile):
         self.nav.clear()
         self.status.showMessage('Lade {}'.format(dbfile), 5000)
@@ -105,7 +105,7 @@ class GradeManagerMain(QtWidgets.QMainWindow):
         s = self.Session()
         base = s.query(db.BaseData).first()
         self.top = items.BaseItem(self.nav, [base.group_name],
-                                  QtGui.QIcon(':/icons/top.png'))
+                                  QtGui.QIcon(':/icons/top'))
         self.nav.addTopLevelItem(self.top)
         group = items.GroupItem(self.top)
         for student in s.query(db.Student).order_by(db.Student.last_name).all():
@@ -143,7 +143,7 @@ class GradeManagerMain(QtWidgets.QMainWindow):
         new_db_window.setWidget(widget)
         new_db_window.setObjectName('NewDBWindow')
         new_db_window.setWindowTitle('DB erstellen')
-        new_db_window.setWindowIcon(QtGui.QIcon(':/icons/db-new.png'))
+        new_db_window.setWindowIcon(QtGui.QIcon(':/icons/db-new'))
         self.main.addSubWindow(new_db_window)
         new_db_window.show()
 
@@ -151,17 +151,17 @@ class GradeManagerMain(QtWidgets.QMainWindow):
         win = QtWidgets.QMdiSubWindow(self)
         widget = widgets.CompaniesWidget(UI_PATH, self.status, self.Session())
         win.setWidget(widget)
-        win.setWindowIcon(QtGui.QIcon(':/icons/add.png'))
+        win.setWindowIcon(QtGui.QIcon(':/icons/add'))
         self.main.addSubWindow(win)
         self.subwindows['companies'] = win
         win.show()
-    
+
     def new_course(self):
         print('new course')
         win = QtWidgets.QMdiSubWindow(self)
         widget = widgets.CourseWidget(UI_PATH, self.status, self.Session())
         win.setWidget(widget)
-        win.setWindowIcon(QtGui.QIcon(':/icons/course-new.png'))
+        win.setWindowIcon(QtGui.QIcon(':/icons/course-new'))
         self.main.addSubWindow(win)
         self.subwindows['courses'] = win
         win.show()

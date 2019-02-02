@@ -7,8 +7,10 @@ from PyQt5.QtGui import QIcon
 def date_to_str(dt):
     try:
         return dt.strftime('%d.%m.%Y')
-    except:
+    except Exception as error:
+        print(error)
         return '-'
+
 
 class BaseItem(QTreeWidgetItem):
     type_ = 'base'
@@ -18,12 +20,13 @@ class BaseItem(QTreeWidgetItem):
         if icon is not None:
             self.setIcon(0, icon)
 
+
 class GroupItem(QTreeWidgetItem):
     type_ = 'group'
 
     def __init__(self, parent):
         QTreeWidgetItem.__init__(self, parent, ['Teilnehmer'])
-        self.setIcon(0, QIcon(':/icons/group.png'))
+        self.setIcon(0, QIcon(':/icons/group'))
 
 
 class StudentItem(QTreeWidgetItem):
@@ -32,7 +35,7 @@ class StudentItem(QTreeWidgetItem):
     def __init__(self, parent, student):
         QTreeWidgetItem.__init__(self, parent, [student.fullname])
         self.student = student
-        self.setIcon(0, QIcon(':/icons/student.png'))
+        self.setIcon(0, QIcon(':/icons/student'))
 
 
 class CourseItem(QTreeWidgetItem):
@@ -41,7 +44,7 @@ class CourseItem(QTreeWidgetItem):
     def __init__(self, parent, course):
         QTreeWidgetItem.__init__(self, parent, [course.title])
         self.course = course
-        self.setIcon(0, QIcon(':/icons/course.png'))
+        self.setIcon(0, QIcon(':/icons/course'))
 
 
 class ExperimentItem(QTreeWidgetItem):
@@ -53,7 +56,7 @@ class ExperimentItem(QTreeWidgetItem):
             ['{} ({})'.format(exp.title, date_to_str(exp.done_on))]
         )
         self.exp = exp
-        self.setIcon(0, QIcon(':/icons/practice.png'))
+        self.setIcon(0, QIcon(':/icons/practice'))
 
 
 class TestItem(QTreeWidgetItem):
@@ -65,7 +68,7 @@ class TestItem(QTreeWidgetItem):
             ['{} ({})'.format(test.subject, date_to_str(test.done_on))]
         )
         self.test = test
-        self.setIcon(0, QIcon(':/icons/theory.png'))
+        self.setIcon(0, QIcon(':/icons/theory'))
 
 
 class CompanyItem(QTreeWidgetItem):

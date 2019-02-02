@@ -33,7 +33,7 @@ class NewDBWidget(QtWidgets.QWidget):
         self.path.textChanged.connect(self.check_inputs)
         self.own_name.setText(INSTITUTION)
         self.logo.setText(LOGO)
-    
+
     def get_path(self):
         dir_ = QtWidgets.QFileDialog.getExistingDirectory(
             self, 'Verzeichnis auswählen', STARTDIR
@@ -63,7 +63,7 @@ class NewDBWidget(QtWidgets.QWidget):
         base = db.BaseData(
             group_name=group, start=date.toPyDate(),
             internal_code=self.internal.text().strip(),
-            institution=self.own_name.text()    
+            institution=self.own_name.text()
         )
         if logo:
             with open(logo, 'rb') as fp:
@@ -137,7 +137,7 @@ class CompaniesWidget(QtWidgets.QWidget):
         self.companies.takeTopLevelItem(index)
         self.to_remove.append(item.company)
         self.btn_save.setEnabled(True)
-    
+
     def save(self):
         self.status.showMessage('Speichere Firmen', 5000)
         iterator = QtWidgets.QTreeWidgetItemIterator(self.companies)
