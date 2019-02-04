@@ -6,12 +6,14 @@ import unittest
 from datetime import date
 from decimal import Decimal as D
 from gman import db, utils
+from gman.crypto import CryptedDBHandler
 from gman.data import IHK, COURSES
 
 
 PATH = os.path.dirname(os.path.abspath(__file__))
 TEST_DB = os.path.join(PATH, 'tests.gmandb')
-CONNECTION_STRING = 'sqlite:///{}'.format(TEST_DB)
+PASSWORD = 'This#is#the#test#password'
+CONNECTION_STRING = 'sqlite:///{}'
 TEST_IMAGE = os.path.join(PATH, 'people-icon.jpg')
 TEST_LOGO = os.path.join(PATH, 'gman', 'theme', 'bbz_logo.png')
 
@@ -121,7 +123,10 @@ def add_theory_grades(session, students, tests):
 
 
 def setup_db():
-    Session = db.get_session(CONNECTION_STRING)
+    handler = CryptedDBHandler(TEST_DB, password=PASSWORD)
+    db_path = handler.decrypt()
+    connection_string = CONNECTION_STRING.format(db_path)
+    Session = db.get_session(connection_string)
     s = Session()
     db.create_tables(s)
     create_base_data(s)
@@ -133,17 +138,23 @@ def setup_db():
     tests = create_tests(s, course)
     add_practice_grades(s, students, exps)
     add_theory_grades(s, students, tests)
+    handler.encrypt()
 
 
 class TestDB(unittest.TestCase):
 
     def setUp(self):
-        Session = db.get_session(CONNECTION_STRING)
+        self.handler = CryptedDBHandler(TEST_DB, password=PASSWORD)
+        db_path = handler.decrypt()
+        connection_string = CONNECTION_STRING.format(db_path)
+        Session = db.get_session(connection_string)
         self.s = Session()
-    
+
     def tearDown(self):
         self.s.close()
+        self.handler.encrypt()
         self.s = None
+        self.handler = None
 
 
 if __name__ == '__main__':
