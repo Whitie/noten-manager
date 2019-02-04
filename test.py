@@ -14,8 +14,8 @@ PATH = os.path.dirname(os.path.abspath(__file__))
 TEST_DB = os.path.join(PATH, 'tests.gmandb')
 PASSWORD = 'This#is#the#test#password'
 CONNECTION_STRING = 'sqlite:///{}'
-TEST_IMAGE = os.path.join(PATH, 'people-icon.jpg')
-TEST_LOGO = os.path.join(PATH, 'gman', 'theme', 'bbz_logo.png')
+TEST_IMAGE = os.path.join(PATH, 'people-icon.png')
+TEST_LOGO = os.path.join(PATH, 'gman', 'theme', 'logo.png')
 
 
 def add_ratings_and_courses(session):
@@ -145,7 +145,7 @@ class TestDB(unittest.TestCase):
 
     def setUp(self):
         self.handler = CryptedDBHandler(TEST_DB, password=PASSWORD)
-        db_path = handler.decrypt()
+        db_path = self.handler.decrypt()
         connection_string = CONNECTION_STRING.format(db_path)
         Session = db.get_session(connection_string)
         self.s = Session()

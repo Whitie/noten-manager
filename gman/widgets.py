@@ -11,9 +11,9 @@ from .data import IHK, COURSES
 
 
 PATH = os.path.dirname(os.path.abspath(__file__))
-STARTDIR = r'\\DC1SBS2011\Zensuren'
+STARTDIR = r'\\10.0.0.10\Zensuren'
 INSTITUTION = 'Bildungswerk Nordostchemie e. V.'
-LOGO = os.path.join(PATH, 'theme', 'bbz_logo.png')
+LOGO = os.path.join(PATH, 'theme', 'logo.png')
 
 
 class NewDBWidget(QtWidgets.QWidget):
