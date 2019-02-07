@@ -4,7 +4,7 @@ from PyQt5.QtWidgets import *
 
 import sys
 
-def main(): 
+def main():
     app     = QApplication (sys.argv)
     tree    = QTreeWidget ()
 
@@ -17,7 +17,7 @@ def main():
             child.setFlags(child.flags() | Qt.ItemIsUserCheckable)
             child.setText(0, "Child {}".format(x))
             child.setCheckState(0, Qt.Unchecked)
-    tree.show() 
+    tree.show()
     sys.exit(app.exec_())
 
 if __name__ == '__main__':
