@@ -96,15 +96,6 @@ class NewDBWidget(QtWidgets.QWidget):
         pass
 
 
-class CreateDBWizard(QtWidgets.QWizard):
-
-    db_created = QtCore.pyqtSignal(str)
-    finished = QtCore.pyqtSignal()
-
-    def __init__(self, ui_path, status, parent=None):
-        QtWidgets.QWizard.__init__(self, parent)
-
-
 class CompaniesWidget(QtWidgets.QWidget):
 
     def __init__(self, ui_path, status, session, parent=None):
