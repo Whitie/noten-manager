@@ -96,6 +96,39 @@ class NewDBWidget(QtWidgets.QWidget):
         pass
 
 
+class CreateDBWizard(QtWidgets.QWizard):
+
+    db_created = QtCore.pyqtSignal(str)
+    finished = QtCore.pyqtSignal()
+
+    def __init__(self, ui_path, status, parent=None):
+        QtWidgets.QWizard.__init__(self, parent)
+        # uic.loadUi(os.path.join(ui_path, 'new_db.ui'), self)
+        self.status = status
+        self.setWindowTitle('Neue Datenbank erstellen')
+        self.setWindowIcon(QtGui.QIcon(':/icons/db-new'))
+        self.addPage(CreateDBWizardPage1(ui_path, status, self))
+        self.addPage(CreateDBWizardPage2(ui_path, status, self))
+
+
+class CreateDBWizardPage1(QtWidgets.QWizardPage):
+
+    def __init__(self, ui_path, status, parent):
+        QtWidgets.QWizardPage.__init__(self, parent)
+        uic.loadUi(os.path.join(ui_path, 'create_db_wiz_1.ui'), self)
+        self.setTitle('Eigene Angaben')
+        self.registerField('own_name*', self.own_name)
+        self.registerField('logo', self.logo)
+
+
+class CreateDBWizardPage2(QtWidgets.QWizardPage):
+
+    def __init__(self, ui_path, status, parent):
+        QtWidgets.QWizardPage.__init__(self, parent)
+        uic.loadUi(os.path.join(ui_path, 'create_db_wiz_2.ui'), self)
+        self.setTitle('Angaben zur Gruppe')
+
+
 class CompaniesWidget(QtWidgets.QWidget):
 
     def __init__(self, ui_path, status, session, parent=None):

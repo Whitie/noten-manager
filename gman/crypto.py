@@ -102,3 +102,7 @@ class CryptedDBHandler:
             fp.write(self._salt)
             fp.write(f.encrypt(data))
         self.lockfile.unlink()
+
+    def create_keyfile(self, path):
+        with open(path, 'wb') as fp:
+            fp.write(Fernet.generate_key())

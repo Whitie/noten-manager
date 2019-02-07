@@ -66,6 +66,8 @@ class GradeManagerMain(QtWidgets.QMainWindow):
 
     def item_right_clicked(self, pos):
         item = self.nav.itemAt(pos)
+        if item is None:
+            return
         print('Right Clicked:', item.type_)
         menu = QtWidgets.QMenu(self)
         menu.addAction(self.action_new_db)
@@ -108,7 +110,8 @@ class GradeManagerMain(QtWidgets.QMainWindow):
                                   QtGui.QIcon(':/icons/top'))
         self.nav.addTopLevelItem(self.top)
         group = items.GroupItem(self.top)
-        for student in s.query(db.Student).order_by(db.Student.last_name).all():
+        for student in s.query(db.Student).order_by(
+                db.Student.last_name).all():
             stud = items.StudentItem(group, student)
             group.addChild(stud)
         self.top.addChild(group)
@@ -116,7 +119,7 @@ class GradeManagerMain(QtWidgets.QMainWindow):
             co = items.CourseItem(self.top, course)
             theory = items.BaseItem(co, ['Theorie'])
             co.addChild(theory)
-            q = s.query(db.Test).filter(db.Test.course==course).order_by(
+            q = s.query(db.Test).filter(db.Test.course == course).order_by(
                 db.Test.done_on
             )
             for t in q.all():
@@ -125,7 +128,7 @@ class GradeManagerMain(QtWidgets.QMainWindow):
             practice = items.BaseItem(co, ['Praxis'])
             co.addChild(practice)
             q = s.query(db.Experiment).filter(
-                db.Experiment.course==course).order_by(db.Experiment.done_on)
+                db.Experiment.course == course).order_by(db.Experiment.done_on)
             for e in q.all():
                 exp = items.ExperimentItem(practice, e)
                 practice.addChild(exp)
@@ -137,13 +140,11 @@ class GradeManagerMain(QtWidgets.QMainWindow):
     def create_new_db(self):
         print('new db')
         new_db_window = QtWidgets.QMdiSubWindow(self)
-        widget = widgets.NewDBWidget(UI_PATH, self.status)
+        widget = widgets.CreateDBWizard(UI_PATH, self.status)
         widget.db_created.connect(self.load_db)
         widget.finished.connect(new_db_window.close)
         new_db_window.setWidget(widget)
-        new_db_window.setObjectName('NewDBWindow')
-        new_db_window.setWindowTitle('DB erstellen')
-        new_db_window.setWindowIcon(QtGui.QIcon(':/icons/db-new'))
+        new_db_window.setObjectName('CreateDBWizard')
         self.main.addSubWindow(new_db_window)
         new_db_window.show()
 
