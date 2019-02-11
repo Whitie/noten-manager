@@ -193,6 +193,7 @@ class CreateDBWizardPage4(QtWidgets.QWizardPage):
         uic.loadUi(os.path.join(ui_path, 'create_db_wiz_4.ui'), self)
         self.btn_password.pressed.connect(self._show_password)
         self.btn_password.released.connect(self._hide_password)
+        self.btn_create_db.clicked.connect(self._create_db)
 
     def initializePage(self):
         store = self.wizard().values
@@ -215,6 +216,9 @@ class CreateDBWizardPage4(QtWidgets.QWizardPage):
 
     def _hide_password(self):
         self.password.setText('***')
+
+    def _create_db(self, checked):
+        print('Create DB')
 
 
 class CompaniesWidget(QtWidgets.QWidget):
