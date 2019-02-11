@@ -91,7 +91,7 @@ class GradeManagerMain(QtWidgets.QMainWindow):
 
     def open_db(self):
         dbfile = QtWidgets.QFileDialog.getOpenFileName(
-            self, 'Datenbank Datei wählen', widgets.STARTDIR,
+            self, 'Datenbank Datei wählen', '.',
             'Noten Dateien (*.gmandb)'
         )
         if dbfile[0]:
@@ -140,6 +140,7 @@ class GradeManagerMain(QtWidgets.QMainWindow):
     def create_new_db(self):
         print('new db')
         new_db_window = QtWidgets.QMdiSubWindow(self)
+        new_db_window.resize(580, 400)
         widget = widgets.CreateDBWizard(UI_PATH, self.status)
         widget.db_created.connect(self.load_db)
         widget.finished.connect(new_db_window.close)

@@ -1,5 +1,9 @@
 <RCC>
   <qresource prefix="icons">
+    <file alias="no">theme/gtk-no.svg</file>
+    <file alias="yes">theme/gtk-yes.svg</file>
+    <file alias="password">theme/keepass.svg</file>
+    <file alias="keyfile">theme/keepassxc.svg</file>
     <file alias="top">theme/gnumeric.svg</file>
     <file alias="save">theme/document-save.svg</file>
     <file alias="db-open">theme/folder-open.svg</file>

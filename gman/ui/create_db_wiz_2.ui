@@ -13,9 +13,21 @@
   <property name="windowTitle">
    <string>WizardPage</string>
   </property>
+  <property name="title">
+   <string>Angaben zur Gruppe</string>
+  </property>
+  <property name="subTitle">
+   <string>Diese Angaben sind wichtig, um die Köpfe für Notenübersichten und Listen korrekt zu generieren.</string>
+  </property>
   <layout class="QFormLayout" name="formLayout">
    <item row="0" column="0">
     <widget class="QLabel" name="label_2">
+     <property name="font">
+      <font>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
+     </property>
      <property name="text">
       <string>Gruppe:</string>
      </property>
@@ -39,6 +51,12 @@
    </item>
    <item row="1" column="0">
     <widget class="QLabel" name="label_3">
+     <property name="font">
+      <font>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
+     </property>
      <property name="text">
       <string>Ausbildungsbeginn:</string>
      </property>
@@ -83,6 +101,9 @@
    </item>
    <item row="2" column="1">
     <widget class="QLineEdit" name="internal_name">
+     <property name="toolTip">
+      <string>Kann auch nachträglich gesetzt werden.</string>
+     </property>
      <property name="maxLength">
       <number>30</number>
      </property>
@@ -109,6 +130,12 @@
    </item>
    <item row="4" column="0">
     <widget class="QLabel" name="label_6">
+     <property name="font">
+      <font>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
+     </property>
      <property name="text">
       <string>Speicherort:</string>
      </property>
@@ -121,8 +148,14 @@
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
       <widget class="QLineEdit" name="save_path">
+       <property name="toolTip">
+        <string>Nur Verzeichnis angeben. Der Dateiname wird automatisch generiert.</string>
+       </property>
        <property name="maxLength">
         <number>255</number>
+       </property>
+       <property name="placeholderText">
+        <string>Verzeichnis</string>
        </property>
       </widget>
      </item>

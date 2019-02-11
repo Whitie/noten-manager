@@ -6,16 +6,28 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
+    <width>498</width>
     <height>195</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>WizardPage</string>
   </property>
+  <property name="title">
+   <string>Eigene Angaben</string>
+  </property>
+  <property name="subTitle">
+   <string>Geben Sie den Namen Ihrer Firma / Institution so ein, wie er auf Ausdrucken erscheinen soll.</string>
+  </property>
   <layout class="QFormLayout" name="formLayout">
    <item row="0" column="0">
     <widget class="QLabel" name="label_5">
+     <property name="font">
+      <font>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
+     </property>
      <property name="text">
       <string>Name:</string>
      </property>
@@ -25,7 +37,14 @@
     </widget>
    </item>
    <item row="0" column="1">
-    <widget class="QLineEdit" name="own_name"/>
+    <widget class="QLineEdit" name="own_name">
+     <property name="maxLength">
+      <number>150</number>
+     </property>
+     <property name="placeholderText">
+      <string>Min. 3 Buchstaben</string>
+     </property>
+    </widget>
    </item>
    <item row="1" column="0">
     <widget class="QLabel" name="label_7">
@@ -40,7 +59,11 @@
    <item row="1" column="1">
     <layout class="QHBoxLayout" name="horizontalLayout_3">
      <item>
-      <widget class="QLineEdit" name="logo"/>
+      <widget class="QLineEdit" name="logo">
+       <property name="maxLength">
+        <number>255</number>
+       </property>
+      </widget>
      </item>
      <item>
       <widget class="QPushButton" name="btn_logo">

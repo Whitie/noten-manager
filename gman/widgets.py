@@ -3,6 +3,7 @@
 import os
 
 from datetime import date, timedelta
+from collections import OrderedDict
 from functools import partial
 from PyQt5 import Qt, QtCore, QtGui, QtWidgets, uic
 
@@ -10,49 +11,30 @@ from . import db, dialogs, items, resources, utils
 from .data import IHK, COURSES
 
 
-PATH = os.path.dirname(os.path.abspath(__file__))
-STARTDIR = r'\\10.0.0.10\Zensuren'
-INSTITUTION = 'Bildungswerk Nordostchemie e. V.'
-LOGO = os.path.join(PATH, 'theme', 'logo.png')
+STARTDIR = os.path.expanduser('~') or '.'
 
 
-class NewDBWidget(QtWidgets.QWidget):
+class CreateDBWizard(QtWidgets.QWizard):
 
     db_created = QtCore.pyqtSignal(str)
     finished = QtCore.pyqtSignal()
 
     def __init__(self, ui_path, status, parent=None):
-        QtWidgets.QWidget.__init__(self, parent)
-        uic.loadUi(os.path.join(ui_path, 'new_db.ui'), self)
+        QtWidgets.QWizard.__init__(self, parent)
         self.status = status
-        self.btn_path.clicked.connect(self.get_path)
-        self.btn_save.clicked.connect(self.save_new_db)
-        self.btn_logo.clicked.connect(self.get_logo)
-        self.btn_save.setEnabled(False)
-        self.group.textChanged.connect(self.check_inputs)
-        self.path.textChanged.connect(self.check_inputs)
-        self.own_name.setText(INSTITUTION)
-        self.logo.setText(LOGO)
-
-    def get_path(self):
-        dir_ = QtWidgets.QFileDialog.getExistingDirectory(
-            self, 'Verzeichnis auswählen', STARTDIR
-        )
-        if dir_:
-            self.path.setText(dir_)
-
-    def get_logo(self):
-        file_ = QtWidgets.QFileDialog.getOpenFileName(
-            self, 'Logo auswählen', STARTDIR, 'Bilddateien (*.png *.jpg)'
-        )
-        if file_[0]:
-            self.logo.setText(file_[0])
+        self.values = OrderedDict()
+        self.setWindowTitle('Neue Datenbank erstellen')
+        self.setWindowIcon(QtGui.QIcon(':/icons/db-new'))
+        self.addPage(CreateDBWizardPage1(ui_path, self))
+        self.addPage(CreateDBWizardPage2(ui_path, self))
+        self.addPage(CreateDBWizardPage3(ui_path, self))
+        self.addPage(CreateDBWizardPage4(ui_path, self))
 
     def save_new_db(self):
-        group = self.group.text().strip()
-        save_path = self.path.text().strip()
-        date = self.start.date()
-        logo = self.logo.text().strip()
+        group = self.values['group']
+        save_path = self.values['save_path']
+        date = self.values['start_date']
+        logo = self.values['logo']
         filename = os.path.join(save_path,
                                 '{}.gmandb'.format(group.replace(' ', '_')))
         self.status.showMessage('Erstelle Datei {}'.format(filename), 2000)
@@ -82,51 +64,157 @@ class NewDBWidget(QtWidgets.QWidget):
         self.db_created.emit(filename)
         self.finished.emit()
 
-    def check_inputs(self, text):
-        group = self.group.text()
-        save_path = self.path.text()
-        is_valid = os.path.isdir(save_path)
-        date = self.start.date()
-        if group and save_path and date and is_valid:
-            self.btn_save.setEnabled(True)
-        else:
-            self.btn_save.setEnabled(False)
-
-    def save(self):
-        pass
-
-
-class CreateDBWizard(QtWidgets.QWizard):
-
-    db_created = QtCore.pyqtSignal(str)
-    finished = QtCore.pyqtSignal()
-
-    def __init__(self, ui_path, status, parent=None):
-        QtWidgets.QWizard.__init__(self, parent)
-        # uic.loadUi(os.path.join(ui_path, 'new_db.ui'), self)
-        self.status = status
-        self.setWindowTitle('Neue Datenbank erstellen')
-        self.setWindowIcon(QtGui.QIcon(':/icons/db-new'))
-        self.addPage(CreateDBWizardPage1(ui_path, status, self))
-        self.addPage(CreateDBWizardPage2(ui_path, status, self))
-
 
 class CreateDBWizardPage1(QtWidgets.QWizardPage):
 
-    def __init__(self, ui_path, status, parent):
+    def __init__(self, ui_path, parent):
         QtWidgets.QWizardPage.__init__(self, parent)
         uic.loadUi(os.path.join(ui_path, 'create_db_wiz_1.ui'), self)
-        self.setTitle('Eigene Angaben')
-        self.registerField('own_name*', self.own_name)
-        self.registerField('logo', self.logo)
+        self.btn_logo.clicked.connect(self.get_logo)
+
+    def validatePage(self):
+        text = self.own_name.text().strip()
+        if len(text) >= 3:
+            self.wizard().values['own_name'] = text
+            self.wizard().values['logo'] = self.logo.text().strip()
+            return True
+        return False
+
+    def get_logo(self):
+        filename, _ = QtWidgets.QFileDialog.getOpenFileName(
+            self, 'Logo auswählen', STARTDIR, 'Bilddateien (*.png *.jpg)'
+        )
+        if filename:
+            self.logo.setText(filename)
 
 
 class CreateDBWizardPage2(QtWidgets.QWizardPage):
 
-    def __init__(self, ui_path, status, parent):
+    def __init__(self, ui_path, parent):
         QtWidgets.QWizardPage.__init__(self, parent)
         uic.loadUi(os.path.join(ui_path, 'create_db_wiz_2.ui'), self)
-        self.setTitle('Angaben zur Gruppe')
+        self.btn_path.clicked.connect(self.get_path)
+
+    def validatePage(self):
+        group = self.group.text().strip()
+        start_date = self.start_date.date()
+        save_path = self.save_path.text().strip()
+        internal_name = self.internal_name.text().strip()
+        if group and start_date and save_path:
+            self.wizard().values['group'] = group
+            self.wizard().values['start_date'] = start_date
+            self.wizard().values['save_path'] = save_path
+            self.wizard().values['internal_name'] = internal_name
+            return True
+        return False
+
+    def get_path(self):
+        dir_ = QtWidgets.QFileDialog.getExistingDirectory(
+            self, 'Verzeichnis auswählen', STARTDIR
+        )
+        if dir_:
+            self.save_path.setText(dir_)
+
+
+class CreateDBWizardPage3(QtWidgets.QWizardPage):
+
+    def __init__(self, ui_path, parent):
+        QtWidgets.QWizardPage.__init__(self, parent)
+        uic.loadUi(os.path.join(ui_path, 'create_db_wiz_3.ui'), self)
+        self.yes = QtGui.QPixmap(':/icons/yes')
+        self.no = QtGui.QPixmap(':/icons/no')
+        self.opt_keyfile.toggled.connect(self._enable_fields)
+        self.password_1.textChanged.connect(self._validate_passwords)
+        self.password_2.textChanged.connect(self._validate_pw_2)
+        self.btn_path.clicked.connect(self.get_path)
+        self.active = 'keyfile'
+
+    def validatePage(self):
+        if self.active == 'keyfile':
+            filename = self.keyfile_path.text().strip()
+            if filename:
+                self.wizard().values['auth'] = 'file'
+                self.wizard().values['file'] = filename
+                return True
+            return False
+        else:
+            password = self.password_1.text().strip()
+            self.wizard().values['auth'] = 'password'
+            self.wizard().values['password'] = password
+            return self._validate_passwords(password)
+
+    def initializePage(self):
+        group = self.wizard().values['group']
+        self.startpath = os.path.join(
+            STARTDIR, '{group}.key'.format(group=group)
+        )
+        self.keyfile_path.setText(self.startpath)
+
+    def get_path(self):
+        filename, _ = QtWidgets.QFileDialog.getSaveFileName(
+            self, 'Datei speichern', self.startpath,
+            'Schlüssel-Dateien (*.key)'
+        )
+        if filename:
+            print(filename)
+            self.keyfile_path.setText(filename)
+
+    def _enable_fields(self, checked):
+        if self.opt_keyfile.isChecked():
+            self.active = 'keyfile'
+            enable = True
+        else:
+            self.active = 'password'
+            enable = False
+        self.keyfile_path.setEnabled(enable)
+        self.btn_path.setEnabled(enable)
+        self.password_1.setDisabled(enable)
+        self.password_2.setDisabled(enable)
+        self.pw_match.setDisabled(enable)
+
+    def _validate_pw_2(self, pw_2):
+        return self._validate_passwords(self.password_1.text())
+
+    def _validate_passwords(self, pw_1):
+        pw_1 = pw_1.strip()
+        pw_2 = self.password_2.text().strip()
+        if len(pw_1) >= 5 and pw_1 == pw_2:
+            self.pw_match.setPixmap(self.yes)
+            return True
+        else:
+            self.pw_match.setPixmap(self.no)
+            return False
+
+
+class CreateDBWizardPage4(QtWidgets.QWizardPage):
+
+    def __init__(self, ui_path, parent):
+        QtWidgets.QWizardPage.__init__(self, parent)
+        uic.loadUi(os.path.join(ui_path, 'create_db_wiz_4.ui'), self)
+        self.btn_password.pressed.connect(self._show_password)
+        self.btn_password.released.connect(self._hide_password)
+
+    def initializePage(self):
+        store = self.wizard().values
+        date = store['start_date'].toPyDate()
+        self.name.setText(store['own_name'])
+        self.logo.setText(store['logo'] or '-')
+        self.group.setText(store['group'])
+        self.start_date.setText(date.strftime('%d.%m.%Y'))
+        self.internal_name.setText(store['internal_name'] or '-')
+        self.save_path.setText(store['save_path'])
+        self.keyfile.setText(store.get('file', '-'))
+        if store['auth'] == 'password':
+            self.password.setText('***')
+            self.btn_password.setEnabled(True)
+        else:
+            self.password.setText('-')
+
+    def _show_password(self):
+        self.password.setText(self.wizard().values['password'])
+
+    def _hide_password(self):
+        self.password.setText('***')
 
 
 class CompaniesWidget(QtWidgets.QWidget):
