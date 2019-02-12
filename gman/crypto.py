@@ -64,7 +64,7 @@ class CryptedDBHandler:
         except FileExistsError:
             with lockfile.open() as fp:
                 user = fp.read()
-            error = SetupError(f'DB locked by {user}.')
+            error = SetupError(f'Datenbank gesperrt von {user}.')
             error.user = user
             raise error
 

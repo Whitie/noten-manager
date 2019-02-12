@@ -48,7 +48,7 @@ class CreateDBWizard(QtWidgets.QWizard):
         )
         handler = crypto.CryptedDBHandler(crypted, keyfile, password)
         db_path = handler.decrypt()
-        Session = db.get_session('sqlite:///{}'.format(db_path))
+        Session = db.get_session('sqlite:///{}'.format(db_path), False)
         s = Session()
         self.status.showMessage('Erstelle Datenbanktabellen')
         db.create_tables(s)

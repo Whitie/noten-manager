@@ -24,7 +24,7 @@ class GradeManagerMain(QtWidgets.QMainWindow):
         self.subwindows = {}
         self.top = None
         self.crypted_db = crypted_db
-        self.db_path = ''
+        self.db_path = None
         self.handler = None
         if crypted_db:
             self.handler = self.get_crypto_handler()
@@ -57,12 +57,16 @@ class GradeManagerMain(QtWidgets.QMainWindow):
         else:
             print('cancel')
             return
-        if result['auth'] == 'file':
-            return crypto.CryptedDBHandler(self.crypted_db,
-                                           keyfile=result['keyfile'])
+        if result['auth'] == 'keyfile':
+            kw = dict(keyfile=result['keyfile'])
         else:
-            return crypto.CryptedDBHandler(self.crypted_db,
-                                           password=result['password'])
+            kw = dict(password=result['password'])
+        try:
+            return crypto.CryptedDBHandler(self.crypted_db, **kw)
+        except crypto.SetupError as err:
+            QtWidgets.QMessageBox.critical(
+                self, 'Datenbankfehler', str(err)
+            )
 
     @property
     def has_course(self):
@@ -193,13 +197,13 @@ class GradeManagerMain(QtWidgets.QMainWindow):
         win.show()
 
     def closeEvent(self, event):
-        print(event)
         reply = QtWidgets.QMessageBox.question(
             self, 'Nachricht', 'Wollen Sie das Programm wirklich beenden?',
             QtWidgets.QMessageBox.Yes, QtWidgets.QMessageBox.No
         )
         if reply == QtWidgets.QMessageBox.Yes:
             if self.handler and self.handler.useable:
+                print('Encrypting DB')
                 self.handler.encrypt()
             event.accept()
         else:
