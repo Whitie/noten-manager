@@ -6,7 +6,7 @@ import sys
 
 from getpass import getuser
 from PyQt5 import QtCore, QtGui, QtWidgets, uic
-from . import db, dialogs, items, resources, widgets
+from . import crypto, db, dialogs, items, resources, widgets
 
 
 PATH = os.path.dirname(os.path.abspath(__file__))
@@ -15,17 +15,21 @@ UI_PATH = os.path.join(PATH, 'ui')
 
 class GradeManagerMain(QtWidgets.QMainWindow):
 
-    def __init__(self, dbfile=''):
+    def __init__(self, crypted_db=''):
         QtWidgets.QMainWindow.__init__(self)
         uic.loadUi(os.path.join(UI_PATH, 'main.ui'), self)
         self.setWindowTitle('bbz Notenmanager - {}'.format(getuser()))
         self.Session = None
-        self.dbfile = dbfile
         self.db_connected = False
         self.subwindows = {}
         self.top = None
-        if dbfile:
-            self.load_db(dbfile)
+        self.crypted_db = crypted_db
+        self.db_path = ''
+        self.handler = None
+        if crypted_db:
+            self.handler = self.get_crypto_handler()
+            if self.handler:
+                self.load_db(self.handler)
         self._connect_actions()
         self._check_available_actions()
         self.nav.itemClicked.connect(self.item_clicked)
@@ -44,6 +48,21 @@ class GradeManagerMain(QtWidgets.QMainWindow):
         self.action_companies.setEnabled(self.db_connected)
         self.action_new_theory.setEnabled(self.has_course)
         self.action_new_practice.setEnabled(self.has_course)
+
+    def get_crypto_handler(self):
+        dlg = dialogs.CredentialsDialog(self, UI_PATH, self.crypted_db)
+        if dlg.exec_() == QtWidgets.QDialog.Accepted:
+            result = dict(auth=dlg.active, keyfile=dlg.keyfile_path.text(),
+                          password=dlg.password.text())
+        else:
+            print('cancel')
+            return
+        if result['auth'] == 'file':
+            return crypto.CryptedDBHandler(self.crypted_db,
+                                           keyfile=result['keyfile'])
+        else:
+            return crypto.CryptedDBHandler(self.crypted_db,
+                                           password=result['password'])
 
     @property
     def has_course(self):
@@ -90,20 +109,25 @@ class GradeManagerMain(QtWidgets.QMainWindow):
         win.show()
 
     def open_db(self):
-        dbfile = QtWidgets.QFileDialog.getOpenFileName(
+        crypted_db, _ = QtWidgets.QFileDialog.getOpenFileName(
             self, 'Datenbank Datei wählen', '.',
             'Noten Dateien (*.gmandb)'
         )
-        if dbfile[0]:
-            dbfile = dbfile[0]
-            if os.path.isfile(dbfile):
-                self.load_db(dbfile)
+        if crypted_db and os.path.isfile(crypted_db):
+            self.crypted_db = crypted_db
+            self.handler = self.get_crypto_handler()
+            if self.handler:
+                self.load_db(self.handler)
 
-    def load_db(self, dbfile):
+    def load_db(self, handler):
+        self.handler = handler
+        if handler.useable:
+            self.db_path = handler.db_path
+        else:
+            self.db_path = handler.decrypt()
         self.nav.clear()
-        self.status.showMessage('Lade {}'.format(dbfile), 5000)
-        self.dbfile = dbfile
-        self.Session = db.get_session('sqlite:///{}'.format(dbfile))
+        self.status.showMessage('Lade {}'.format(self.db_path), 5000)
+        self.Session = db.get_session('sqlite:///{}'.format(self.db_path))
         s = self.Session()
         base = s.query(db.BaseData).first()
         self.top = items.BaseItem(self.nav, [base.group_name],
@@ -168,14 +192,27 @@ class GradeManagerMain(QtWidgets.QMainWindow):
         self.subwindows['courses'] = win
         win.show()
 
+    def closeEvent(self, event):
+        print(event)
+        reply = QtWidgets.QMessageBox.question(
+            self, 'Nachricht', 'Wollen Sie das Programm wirklich beenden?',
+            QtWidgets.QMessageBox.Yes, QtWidgets.QMessageBox.No
+        )
+        if reply == QtWidgets.QMessageBox.Yes:
+            if self.handler and self.handler.useable:
+                self.handler.encrypt()
+            event.accept()
+        else:
+            event.ignore()
+
 
 def main():
     if len(sys.argv) > 1:
-        db = sys.argv.pop(1)
+        crypted_db = sys.argv.pop(1)
     else:
-        db = ''
+        crypted_db = ''
     app = QtWidgets.QApplication(sys.argv)
-    gmm = GradeManagerMain(db)
+    gmm = GradeManagerMain(crypted_db)
     gmm.show()
     return app.exec_()
 

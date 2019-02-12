@@ -160,4 +160,4 @@ class TestDB(unittest.TestCase):
 if __name__ == '__main__':
     setup_db()
     unittest.main()
-    #os.remove(TEST_DB)
+    # os.remove(TEST_DB)

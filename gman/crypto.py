@@ -13,6 +13,11 @@ from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 
 
+def create_keyfile(path):
+    with open(path, 'wb') as fp:
+        fp.write(Fernet.generate_key())
+
+
 class SetupError(Exception):
     user = ''
 
@@ -40,12 +45,15 @@ class CryptedDBHandler:
         if not self.crypted.exists():
             self._create_crypted_file()
         if keyfile is not None:
+            if not os.path.exists(keyfile):
+                create_keyfile(keyfile)
             self.store = self._read_token_from_file(keyfile)
         else:
             self.store = self._make_token(password)
         self.lockfile = self.lock()
         self.tmp = TemporaryDirectory(suffix='-gman')
         self.db_path = pathlib.Path(self.tmp.name, f'gman-{self.user}.sqlite')
+        self.useable = False
 
     def lock(self):
         lockfile = self.crypted.with_suffix('.lock')
@@ -91,6 +99,7 @@ class CryptedDBHandler:
             f = Fernet(self.store.key)
             with self.db_path.open('wb') as fp:
                 fp.write(f.decrypt(data))
+        self.useable = True
         return self.db_path
 
     def encrypt(self):
@@ -102,7 +111,4 @@ class CryptedDBHandler:
             fp.write(self._salt)
             fp.write(f.encrypt(data))
         self.lockfile.unlink()
-
-    def create_keyfile(self, path):
-        with open(path, 'wb') as fp:
-            fp.write(Fernet.generate_key())
+        self.useable = False

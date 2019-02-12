@@ -7,7 +7,7 @@ from collections import OrderedDict
 from functools import partial
 from PyQt5 import Qt, QtCore, QtGui, QtWidgets, uic
 
-from . import db, dialogs, items, resources, utils
+from . import crypto, db, dialogs, items, resources, utils
 from .data import IHK, COURSES
 
 
@@ -16,8 +16,7 @@ STARTDIR = os.path.expanduser('~') or '.'
 
 class CreateDBWizard(QtWidgets.QWizard):
 
-    db_created = QtCore.pyqtSignal(str)
-    finished = QtCore.pyqtSignal()
+    db_created = QtCore.pyqtSignal(crypto.CryptedDBHandler)
 
     def __init__(self, ui_path, status, parent=None):
         QtWidgets.QWizard.__init__(self, parent)
@@ -30,39 +29,56 @@ class CreateDBWizard(QtWidgets.QWizard):
         self.addPage(CreateDBWizardPage3(ui_path, self))
         self.addPage(CreateDBWizardPage4(ui_path, self))
 
-    def save_new_db(self):
+    def create_new_db(self):
         group = self.values['group']
         save_path = self.values['save_path']
         date = self.values['start_date']
         logo = self.values['logo']
-        filename = os.path.join(save_path,
-                                '{}.gmandb'.format(group.replace(' ', '_')))
-        self.status.showMessage('Erstelle Datei {}'.format(filename), 2000)
-        Session = db.get_session('sqlite:///{}'.format(filename))
+        if self.values['auth'] == 'file':
+            keyfile = self.values['file']
+            password = None
+        else:
+            keyfile = None
+            password = self.values['password']
+        crypted = os.path.join(
+            save_path, '{}.gmandb'.format(group.replace(' ', '_'))
+        )
+        self.status.showMessage(
+            'Erstelle verschlüsselte Datei {}'.format(crypted)
+        )
+        handler = crypto.CryptedDBHandler(crypted, keyfile, password)
+        db_path = handler.decrypt()
+        Session = db.get_session('sqlite:///{}'.format(db_path))
         s = Session()
-        self.status.showMessage('Erstelle Datenbanktabellen', 2000)
+        self.status.showMessage('Erstelle Datenbanktabellen')
         db.create_tables(s)
+        self.status.showMessage('Schreibe Basisdaten')
         base = db.BaseData(
             group_name=group, start=date.toPyDate(),
-            internal_code=self.internal.text().strip(),
-            institution=self.own_name.text()
+            internal_code=self.values['internal_name'],
+            institution=self.values['own_name']
         )
         if logo:
             with open(logo, 'rb') as fp:
                 base.logo = fp.read()
         s.add(base)
+        self.status.showMessage('Schreibe Punktschlüssel')
         for points, school, text in IHK:
             s.add(
                 db.Ratings(key='IHK', points=points, school_grade=school,
                            text_rating=text)
             )
+        self.status.showMessage('Schreibe Kurse')
         for job, courses in COURSES.items():
             for course in courses:
                 s.add(db.CourseData(job=job, title=course))
         s.commit()
-        self.status.showMessage('Datei ist jetzt verwendbar', 5000)
-        self.db_created.emit(filename)
-        self.finished.emit()
+        self.status.showMessage('Die Datenbank ist jetzt verwendbar')
+        QtWidgets.QMessageBox.information(
+            self, 'Datenbank wurde erfolgreich erstellt',
+            'Bewahren Sie den Schlüssel / das Passwort gut auf!'
+        )
+        self.db_created.emit(handler)
 
 
 class CreateDBWizardPage1(QtWidgets.QWizardPage):
@@ -219,6 +235,9 @@ class CreateDBWizardPage4(QtWidgets.QWizardPage):
 
     def _create_db(self, checked):
         print('Create DB')
+        self.btn_create_db.setDisabled(True)
+        self.wizard().create_new_db()
+        self.btn_create_db.setIcon(QtGui.QIcon(':/icons/yes'))
 
 
 class CompaniesWidget(QtWidgets.QWidget):
@@ -327,14 +346,14 @@ class StudentsWidget(QtWidgets.QWidget):
                        'hier ausgeblendet werden.')
         box = QtWidgets.QCheckBox(wid)
         box.stateChanged.connect(partial(self._state_changed, student))
-        l = QtWidgets.QHBoxLayout()
+        layout = QtWidgets.QHBoxLayout()
         if not student.show:
             box.setCheckState(QtCore.Qt.Unchecked)
         else:
             box.setCheckState(QtCore.Qt.Checked)
-        l.addWidget(box)
-        l.setAlignment(QtCore.Qt.AlignCenter)
-        wid.setLayout(l)
+        layout.addWidget(box)
+        layout.setAlignment(QtCore.Qt.AlignCenter)
+        wid.setLayout(layout)
         return wid
 
     def load_data(self):
@@ -391,8 +410,9 @@ class StudentsWidget(QtWidgets.QWidget):
                 student = self.students[row]
                 student.last_name = name
                 student.first_name = self.table.item(row, 1).text().strip()
-                student.company_id = self.table.cellWidget(row, 2
-                    ).currentData()
+                student.company_id = self.table.cellWidget(
+                    row, 2
+                ).currentData()
                 self.session.add(student)
         self.session.commit()
 
