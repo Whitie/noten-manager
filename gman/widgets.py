@@ -308,6 +308,8 @@ class CompaniesWidget(QtWidgets.QWidget):
 
 class StudentsWidget(QtWidgets.QWidget):
 
+    saved = QtCore.pyqtSignal()
+
     def __init__(self, ui_path, status, session, new_count=0, parent=None):
         QtWidgets.QWidget.__init__(self, parent)
         uic.loadUi(os.path.join(ui_path, 'students.ui'), self)
@@ -415,9 +417,12 @@ class StudentsWidget(QtWidgets.QWidget):
                 ).currentData()
                 self.session.add(student)
         self.session.commit()
+        self.saved.emit()
 
 
 class CourseWidget(QtWidgets.QWidget):
+
+    saved = QtCore.pyqtSignal()
 
     def __init__(self, ui_path, status, session, parent=None):
         QtWidgets.QWidget.__init__(self, parent)
@@ -481,4 +486,4 @@ class CourseWidget(QtWidgets.QWidget):
         self.session.add(course)
         self.session.commit()
         self.status.showMessage('Neuer Kurs wurde gespeichert.', 5000)
-        self.close()
+        self.saved.emit()

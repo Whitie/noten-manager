@@ -121,9 +121,17 @@
     <addaction name="action_new_course"/>
     <addaction name="action_new_db"/>
    </widget>
+   <widget class="QMenu" name="menuHilfe">
+    <property name="title">
+     <string>Hilfe</string>
+    </property>
+    <addaction name="action_help"/>
+    <addaction name="action_about"/>
+   </widget>
    <addaction name="menuDatei"/>
    <addaction name="menuBearbeiten"/>
    <addaction name="menuErstellen"/>
+   <addaction name="menuHilfe"/>
   </widget>
   <widget class="QStatusBar" name="status"/>
   <widget class="QToolBar" name="tools">
@@ -144,6 +152,7 @@
    <addaction name="action_add_students"/>
    <addaction name="action_companies"/>
    <addaction name="separator"/>
+   <addaction name="action_help"/>
   </widget>
   <action name="action_open_db">
    <property name="icon">
@@ -242,6 +251,30 @@
    </property>
    <property name="toolTip">
     <string>Firmen hinzufügen / ändern</string>
+   </property>
+  </action>
+  <action name="action_help">
+   <property name="icon">
+    <iconset resource="../resources.qrc">
+     <normaloff>:/icons/help</normaloff>:/icons/help</iconset>
+   </property>
+   <property name="text">
+    <string>Dokumentation / Hilfe</string>
+   </property>
+   <property name="toolTip">
+    <string>Dokumentation und Hilfe zum Notenmanager</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+H</string>
+   </property>
+  </action>
+  <action name="action_about">
+   <property name="icon">
+    <iconset resource="../resources.qrc">
+     <normaloff>:/icons/info</normaloff>:/icons/info</iconset>
+   </property>
+   <property name="text">
+    <string>Über</string>
    </property>
   </action>
  </widget>

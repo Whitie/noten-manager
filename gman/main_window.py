@@ -4,6 +4,7 @@
 import os
 import sys
 
+from functools import partial
 from getpass import getuser
 from PyQt5 import QtCore, QtGui, QtWidgets, uic
 from . import crypto, db, dialogs, items, resources, widgets
@@ -106,6 +107,8 @@ class GradeManagerMain(QtWidgets.QMainWindow):
         win = QtWidgets.QMdiSubWindow(self)
         widget = widgets.StudentsWidget(UI_PATH, self.status, self.Session(),
                                         count)
+        widget.saved.connect(partial(self.load_db, handler=self.handler))
+        widget.saved.connect(win.close)
         win.setWidget(widget)
         win.setWindowIcon(QtGui.QIcon(':/icons/group-new'))
         self.main.addSubWindow(win)
@@ -145,7 +148,8 @@ class GradeManagerMain(QtWidgets.QMainWindow):
         self.top.addChild(group)
         for course in s.query(db.Course).order_by(db.Course.start).all():
             co = items.CourseItem(self.top, course)
-            theory = items.BaseItem(co, ['Theorie'])
+            theory = items.BaseItem(co, ['Theorie'],
+                                    QtGui.QIcon(':/icons/theory'))
             co.addChild(theory)
             q = s.query(db.Test).filter(db.Test.course == course).order_by(
                 db.Test.done_on
@@ -153,7 +157,8 @@ class GradeManagerMain(QtWidgets.QMainWindow):
             for t in q.all():
                 test = items.TestItem(theory, t)
                 theory.addChild(test)
-            practice = items.BaseItem(co, ['Praxis'])
+            practice = items.BaseItem(co, ['Praxis'],
+                                      QtGui.QIcon(':/icons/practice'))
             co.addChild(practice)
             q = s.query(db.Experiment).filter(
                 db.Experiment.course == course).order_by(db.Experiment.done_on)
@@ -192,6 +197,8 @@ class GradeManagerMain(QtWidgets.QMainWindow):
         widget = widgets.CourseWidget(UI_PATH, self.status, self.Session())
         win.setWidget(widget)
         win.setWindowIcon(QtGui.QIcon(':/icons/course-new'))
+        widget.saved.connect(partial(self.load_db, handler=self.handler))
+        widget.saved.connect(win.close)
         self.main.addSubWindow(win)
         self.subwindows['courses'] = win
         win.show()

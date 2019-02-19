@@ -36,6 +36,7 @@ class StudentItem(QTreeWidgetItem):
         QTreeWidgetItem.__init__(self, parent, [student.fullname])
         self.student = student
         self.setIcon(0, QIcon(':/icons/student'))
+        # self.setToolTip(0, str(student.company))
 
 
 class CourseItem(QTreeWidgetItem):
@@ -45,6 +46,10 @@ class CourseItem(QTreeWidgetItem):
         QTreeWidgetItem.__init__(self, parent, [course.title])
         self.course = course
         self.setIcon(0, QIcon(':/icons/course'))
+        tip = '{}, {:%d.%m.%Y} - {:%d.%m.%Y}'.format(
+            course.title, course.start, course.end
+        )
+        self.setToolTip(0, tip)
 
 
 class ExperimentItem(QTreeWidgetItem):

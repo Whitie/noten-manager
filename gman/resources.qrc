@@ -1,5 +1,7 @@
 <RCC>
   <qresource prefix="icons">
+    <file alias="info">theme/dialog-information.svgz</file>
+    <file alias="help">theme/system-help.svgz</file>
     <file alias="yes">theme/dialog-ok-apply.svgz</file>
     <file alias="no">theme/dialog-cancel.svgz</file>
     <file alias="keyfile">theme/application-pgp-keys.svgz</file>
