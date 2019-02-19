@@ -197,17 +197,10 @@ class GradeManagerMain(QtWidgets.QMainWindow):
         win.show()
 
     def closeEvent(self, event):
-        reply = QtWidgets.QMessageBox.question(
-            self, 'Nachricht', 'Wollen Sie das Programm wirklich beenden?',
-            QtWidgets.QMessageBox.Yes, QtWidgets.QMessageBox.No
-        )
-        if reply == QtWidgets.QMessageBox.Yes:
-            if self.handler and self.handler.useable:
-                print('Encrypting DB')
-                self.handler.encrypt()
-            event.accept()
-        else:
-            event.ignore()
+        if self.handler and self.handler.useable:
+            print('Encrypting DB')
+            self.handler.encrypt()
+        event.accept()
 
 
 def main():

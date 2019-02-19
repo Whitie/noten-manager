@@ -1,24 +1,25 @@
 <RCC>
   <qresource prefix="icons">
-    <file alias="no">theme/gtk-no.svg</file>
-    <file alias="yes">theme/gtk-yes.svg</file>
-    <file alias="password">theme/keepass.svg</file>
-    <file alias="keyfile">theme/keepassxc.svg</file>
-    <file alias="top">theme/gnumeric.svg</file>
-    <file alias="save">theme/document-save.svg</file>
-    <file alias="db-open">theme/folder-open.svg</file>
-    <file alias="db-new">theme/stock_folder-properties.svg</file>
-    <file alias="remove">theme/remove.svg</file>
-    <file alias="add">theme/add.svg</file>
-    <file alias="theory">theme/applications-science.svg</file>
-    <file alias="new">theme/document-new.svg</file>
-    <file alias="print">theme/document-print.svg</file>
-    <file alias="warning">theme/emblem-important.svg</file>
-    <file alias="group">theme/emblem-people.svg</file>
-    <file alias="student">theme/emblem-personal.svg</file>
-    <file alias="course">theme/fileopen.svg</file>
-    <file alias="course-new">theme/folder-new.svg</file>
-    <file alias="practice">theme/gelemental.svg</file>
-    <file alias="app">theme/gnome-power-statistics.svg</file>
+    <file alias="yes">theme/dialog-ok-apply.svgz</file>
+    <file alias="no">theme/dialog-cancel.svgz</file>
+    <file alias="keyfile">theme/application-pgp-keys.svgz</file>
+    <file alias="password">theme/application-pgp-encrypted.svgz</file>
+    <file alias="top">theme/kspread.svgz</file>
+    <file alias="db-open">theme/server-database.svgz</file>
+    <file alias="save">theme/document-save.svgz</file>
+    <file alias="db-new">theme/server-database.svgz</file>
+    <file alias="remove">theme/list-remove.svgz</file>
+    <file alias="add">theme/list-add.svgz</file>
+    <file alias="new">theme/document-new.svgz</file>
+    <file alias="theory">theme/kformula.svgz</file>
+    <file alias="print">theme/document-print.svgz</file>
+    <file alias="warning">theme/emblem-important.svgz</file>
+    <file alias="group-new">theme/user-group-new.svgz</file>
+    <file alias="group">theme/system-users.svgz</file>
+    <file alias="course">theme/tab-duplicate.svgz</file>
+    <file alias="student">theme/user-identity.svgz</file>
+    <file alias="course-new">theme/tab-new-background.svgz</file>
+    <file alias="practice">theme/applications-science.svgz</file>
+    <file alias="app">theme/mail-task.svgz</file>
   </qresource>
 </RCC>
