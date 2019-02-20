@@ -32,9 +32,13 @@ class GradeManagerMain(QtWidgets.QMainWindow):
             if self.handler:
                 self.load_db(self.handler)
         self._connect_actions()
-        self._check_available_actions()
         self.nav.itemClicked.connect(self.item_clicked)
         self.nav.customContextMenuRequested.connect(self.item_right_clicked)
+        self.available_actions_timer = QtCore.QTimer(self)
+        self.available_actions_timer.timeout.connect(
+            self._check_available_actions
+        )
+        self.available_actions_timer.start(2000)
 
     def _connect_actions(self):
         self.action_new_db.triggered.connect(self.create_new_db)
@@ -42,6 +46,7 @@ class GradeManagerMain(QtWidgets.QMainWindow):
         self.action_add_students.triggered.connect(self.add_students)
         self.action_companies.triggered.connect(self.edit_companies)
         self.action_new_course.triggered.connect(self.new_course)
+        self.action_save_all.triggered.connect(self.save_all)
 
     def _check_available_actions(self):
         self.action_add_students.setEnabled(self.db_connected)
@@ -49,6 +54,7 @@ class GradeManagerMain(QtWidgets.QMainWindow):
         self.action_companies.setEnabled(self.db_connected)
         self.action_new_theory.setEnabled(self.has_course)
         self.action_new_practice.setEnabled(self.has_course)
+        self.action_save_all.setEnabled(bool(self.subwindows))
 
     def get_crypto_handler(self):
         dlg = dialogs.CredentialsDialog(self, UI_PATH, self.crypted_db)
@@ -167,7 +173,6 @@ class GradeManagerMain(QtWidgets.QMainWindow):
                 practice.addChild(exp)
             self.top.addChild(co)
         self.db_connected = True
-        self._check_available_actions()
         self.top.setExpanded(True)
 
     def create_new_db(self):
@@ -203,8 +208,26 @@ class GradeManagerMain(QtWidgets.QMainWindow):
         self.subwindows['courses'] = win
         win.show()
 
+    def save_all(self, on_close=False):
+        for name, subwindow in self.subwindows.items():
+            if isinstance(subwindow, list):
+                for sub in subwindow:
+                    self._save(name, sub, on_close)
+            else:
+                self._save(name, subwindow, on_close)
+
+    def _save(self, name, window, on_close):
+        print('Saving:', name, window)
+        self.status.showMessage('Speichere: {}'.format(name))
+        widget = window.widget()
+        try:
+            widget.save(on_close=on_close)
+        except Exception as error:
+            print('Fehler beim Speichern:', error)
+
     def closeEvent(self, event):
         if self.handler and self.handler.useable:
+            self.save_all(True)
             print('Encrypting DB')
             self.handler.encrypt()
         event.accept()

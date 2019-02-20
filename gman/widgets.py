@@ -80,6 +80,9 @@ class CreateDBWizard(QtWidgets.QWizard):
         )
         self.db_created.emit(handler)
 
+    def save(self, on_close=False):
+        pass
+
 
 class CreateDBWizardPage1(QtWidgets.QWizardPage):
 
@@ -282,7 +285,7 @@ class CompaniesWidget(QtWidgets.QWidget):
         self.to_remove.append(item.company)
         self.btn_save.setEnabled(True)
 
-    def save(self):
+    def save(self, on_close=False):
         self.status.showMessage('Speichere Firmen', 5000)
         iterator = QtWidgets.QTreeWidgetItemIterator(self.companies)
         while iterator.value():
@@ -402,7 +405,7 @@ class StudentsWidget(QtWidgets.QWidget):
     def _state_changed(self, student, new_state):
         student.show = bool(new_state)
 
-    def save(self):
+    def save(self, on_close=False):
         for row in range(self.table.rowCount()):
             wid = self.table.item(row, 0)
             if not wid:
@@ -417,7 +420,8 @@ class StudentsWidget(QtWidgets.QWidget):
                 ).currentData()
                 self.session.add(student)
         self.session.commit()
-        self.saved.emit()
+        if not on_close:
+            self.saved.emit()
 
 
 class CourseWidget(QtWidgets.QWidget):
@@ -474,7 +478,7 @@ class CourseWidget(QtWidgets.QWidget):
         dlg = dialogs.CourseDialog(self, self.ui_path, courses)
         dlg.show()
 
-    def save(self):
+    def save(self, on_close=False):
         title = self.title.text()
         trainer = self.trainer.currentText()
         start = self.start.date().toPyDate()
@@ -486,4 +490,5 @@ class CourseWidget(QtWidgets.QWidget):
         self.session.add(course)
         self.session.commit()
         self.status.showMessage('Neuer Kurs wurde gespeichert.', 5000)
-        self.saved.emit()
+        if not on_close:
+            self.saved.emit()

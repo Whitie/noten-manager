@@ -104,6 +104,7 @@
      <string>Datei</string>
     </property>
     <addaction name="action_open_db"/>
+    <addaction name="action_save_all"/>
    </widget>
    <widget class="QMenu" name="menuBearbeiten">
     <property name="title">
@@ -145,6 +146,7 @@
     <bool>false</bool>
    </attribute>
    <addaction name="action_open_db"/>
+   <addaction name="action_save_all"/>
    <addaction name="separator"/>
    <addaction name="action_new_practice"/>
    <addaction name="action_new_theory"/>
@@ -275,6 +277,21 @@
    </property>
    <property name="text">
     <string>Über</string>
+   </property>
+  </action>
+  <action name="action_save_all">
+   <property name="icon">
+    <iconset resource="../resources.qrc">
+     <normaloff>:/icons/save-all</normaloff>:/icons/save-all</iconset>
+   </property>
+   <property name="text">
+    <string>Alles speichern</string>
+   </property>
+   <property name="toolTip">
+    <string>Alle Daten speichern (wird automatisch beim Beenden ausgeführt)</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+S</string>
    </property>
   </action>
  </widget>
