@@ -22,6 +22,10 @@ class SetupError(Exception):
     user = ''
 
 
+class CryptoKeyError(Exception):
+    pass
+
+
 class KeyStore:
     """Object to store the key more secure."""
 
@@ -97,8 +101,14 @@ class CryptedDBHandler:
             data = fp.read()
         if data:
             f = Fernet(self.store.key)
-            with self.db_path.open('wb') as fp:
-                fp.write(f.decrypt(data))
+            try:
+                with self.db_path.open('wb') as fp:
+                    fp.write(f.decrypt(data))
+            except Exception as error:
+                self.useable = False
+                print('Error:', error)
+                raise CryptoKeyError('Passwort oder Keyfile stimmt nicht. '
+                                     'Datei kann nicht entschlüsselt werden.')
         self.useable = True
         return self.db_path
 
