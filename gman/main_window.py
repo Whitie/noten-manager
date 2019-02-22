@@ -98,11 +98,15 @@ class GradeManagerMain(QtWidgets.QMainWindow):
 
     def item_right_clicked(self, pos):
         item = self.nav.itemAt(pos)
-        if item is None:
+        if item is None or item.type_ not in ('group', 'course'):
             return
         print('Right Clicked:', item.type_)
         menu = QtWidgets.QMenu(self)
-        menu.addAction(self.action_new_db)
+        if item.type_ == 'group':
+            menu.addAction(self.action_add_students)
+        elif item.type_ == 'course':
+            menu.addAction(self.action_new_theory)
+            menu.addAction(self.action_new_practice)
         menu.exec_(self.nav.mapToGlobal(pos))
 
     def add_students(self):
