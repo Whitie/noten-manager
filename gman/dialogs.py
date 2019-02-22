@@ -72,3 +72,18 @@ class HelpDialog(QtWidgets.QDialog):
         self.btn_next.clicked.connect(self.browser.forward)
         self.browser.backwardAvailable.connect(self.btn_back.setEnabled)
         self.browser.forwardAvailable.connect(self.btn_next.setEnabled)
+        self.browser.historyChanged.connect(self.history_changed)
+
+    def history_changed(self):
+        if self.browser.isBackwardAvailable():
+            last = self.browser.historyTitle(-1)
+            self.btn_back.setToolTip(last)
+        else:
+            self.btn_back.setToolTip('')
+        if self.browser.isForwardAvailable():
+            next = self.browser.historyTitle(1)
+            self.btn_next.setToolTip(next)
+        else:
+            self.btn_next.setToolTip('')
+        current = self.browser.historyTitle(0)
+        self.setWindowTitle(current)
