@@ -35,11 +35,8 @@ class GradeManagerMain(QtWidgets.QMainWindow):
         self._connect_actions()
         self.nav.itemClicked.connect(self.item_clicked)
         self.nav.customContextMenuRequested.connect(self.item_right_clicked)
-        self.available_actions_timer = QtCore.QTimer(self)
-        self.available_actions_timer.timeout.connect(
-            self._check_available_actions
-        )
-        self.available_actions_timer.start(2000)
+        self.nav.itemDoubleClicked.connect(self.item_double_clicked)
+        self._check_available_actions()
 
     def _connect_actions(self):
         self.action_new_db.triggered.connect(self.create_new_db)
@@ -96,6 +93,9 @@ class GradeManagerMain(QtWidgets.QMainWindow):
     def item_clicked(self, item, col):
         print('Clicked:', item.type_)
 
+    def item_double_clicked(self, item, col):
+        print('Double clicked:', item.type_)
+
     def item_right_clicked(self, pos):
         item = self.nav.itemAt(pos)
         if item is None:
@@ -122,6 +122,7 @@ class GradeManagerMain(QtWidgets.QMainWindow):
         self.main.addSubWindow(win)
         self.subwindows['students'] = win
         win.show()
+        self._check_available_actions()
 
     def open_db(self):
         crypted_db, _ = QtWidgets.QFileDialog.getOpenFileName(
@@ -162,8 +163,9 @@ class GradeManagerMain(QtWidgets.QMainWindow):
         self.top.addChild(group)
         for course in s.query(db.Course).order_by(db.Course.start).all():
             co = items.CourseItem(self.top, course)
-            theory = items.BaseItem(co, ['Theorie'],
-                                    QtGui.QIcon(':/icons/theory'))
+            theory = items.TheoryItem(
+                co, ['Theorie'], QtGui.QIcon(':/icons/theory')
+            )
             co.addChild(theory)
             q = s.query(db.Test).filter(db.Test.course == course).order_by(
                 db.Test.done_on
@@ -171,8 +173,9 @@ class GradeManagerMain(QtWidgets.QMainWindow):
             for t in q.all():
                 test = items.TestItem(theory, t)
                 theory.addChild(test)
-            practice = items.BaseItem(co, ['Praxis'],
-                                      QtGui.QIcon(':/icons/practice'))
+            practice = items.PracticeItem(
+                co, ['Praxis'], QtGui.QIcon(':/icons/practice')
+            )
             co.addChild(practice)
             q = s.query(db.Experiment).filter(
                 db.Experiment.course == course).order_by(db.Experiment.done_on)
@@ -182,6 +185,7 @@ class GradeManagerMain(QtWidgets.QMainWindow):
             self.top.addChild(co)
         self.db_connected = True
         self.top.setExpanded(True)
+        self._check_available_actions()
 
     def create_new_db(self):
         print('new db')
@@ -203,6 +207,7 @@ class GradeManagerMain(QtWidgets.QMainWindow):
         self.main.addSubWindow(win)
         self.subwindows['companies'] = win
         win.show()
+        self._check_available_actions()
 
     def new_course(self):
         print('new course')
@@ -215,6 +220,7 @@ class GradeManagerMain(QtWidgets.QMainWindow):
         self.main.addSubWindow(win)
         self.subwindows['courses'] = win
         win.show()
+        self._check_available_actions()
 
     def show_help(self):
         print('Help requested')
