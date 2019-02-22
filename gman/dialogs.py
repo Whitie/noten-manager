@@ -2,7 +2,7 @@
 
 import os
 
-from PyQt5 import QtWidgets, uic
+from PyQt5 import QtCore, QtWidgets, uic
 
 
 class StudentDialog(QtWidgets.QDialog):
@@ -57,3 +57,18 @@ class CredentialsDialog(QtWidgets.QDialog):
         self.keyfile_path.setEnabled(enable)
         self.btn_keyfile.setEnabled(enable)
         self.password.setDisabled(enable)
+
+
+class HelpDialog(QtWidgets.QDialog):
+
+    def __init__(self, parent, ui_path, doc_path):
+        QtWidgets.QDialog.__init__(self, parent)
+        uic.loadUi(os.path.join(ui_path, 'help_browser.ui'), self)
+        self.browser.setSearchPaths([doc_path])
+        self.browser.setSource(QtCore.QUrl('index.html'))
+        self.btn_close.clicked.connect(self.close)
+        self.btn_home.clicked.connect(self.browser.home)
+        self.btn_back.clicked.connect(self.browser.backward)
+        self.btn_next.clicked.connect(self.browser.forward)
+        self.browser.backwardAvailable.connect(self.btn_back.setEnabled)
+        self.browser.forwardAvailable.connect(self.btn_next.setEnabled)

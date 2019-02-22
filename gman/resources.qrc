@@ -1,5 +1,9 @@
 <RCC>
   <qresource prefix="icons">
+    <file alias="close">theme/dialog-close.svgz</file>
+    <file alias="home">theme/go-home.svgz</file>
+    <file alias="next">theme/go-next.svgz</file>
+    <file alias="prev">theme/go-previous.svgz</file>
     <file alias="save-all">theme/document-save-all.svgz</file>
     <file alias="info">theme/dialog-information.svgz</file>
     <file alias="help">theme/system-help.svgz</file>

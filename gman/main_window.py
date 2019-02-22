@@ -12,6 +12,7 @@ from . import crypto, db, dialogs, items, resources, widgets
 
 PATH = os.path.dirname(os.path.abspath(__file__))
 UI_PATH = os.path.join(PATH, 'ui')
+DOC_PATH = os.path.join(PATH, 'docs')
 
 
 class GradeManagerMain(QtWidgets.QMainWindow):
@@ -47,6 +48,7 @@ class GradeManagerMain(QtWidgets.QMainWindow):
         self.action_companies.triggered.connect(self.edit_companies)
         self.action_new_course.triggered.connect(self.new_course)
         self.action_save_all.triggered.connect(self.save_all)
+        self.action_help.triggered.connect(self.show_help)
 
     def _check_available_actions(self):
         self.action_add_students.setEnabled(self.db_connected)
@@ -137,7 +139,13 @@ class GradeManagerMain(QtWidgets.QMainWindow):
         if handler.useable:
             self.db_path = handler.db_path
         else:
-            self.db_path = handler.decrypt()
+            try:
+                self.db_path = handler.decrypt()
+            except crypto.CryptoKeyError as error:
+                QtWidgets.QMessageBox.critical(
+                    self, 'Fehler beim Entschlüsseln', str(error)
+                )
+                return
         self.nav.clear()
         self.status.showMessage('Lade {}'.format(self.db_path), 5000)
         self.Session = db.get_session('sqlite:///{}'.format(self.db_path))
@@ -207,6 +215,11 @@ class GradeManagerMain(QtWidgets.QMainWindow):
         self.main.addSubWindow(win)
         self.subwindows['courses'] = win
         win.show()
+
+    def show_help(self):
+        print('Help requested')
+        dlg = dialogs.HelpDialog(self, UI_PATH, DOC_PATH)
+        dlg.show()
 
     def save_all(self, on_close=False):
         for name, subwindow in self.subwindows.items():
