@@ -21,6 +21,14 @@ class BaseItem(QTreeWidgetItem):
             self.setIcon(0, icon)
 
 
+class TheoryItem(BaseItem):
+    type_ = 'theory'
+
+
+class PracticeItem(BaseItem):
+    type_ = 'practice'
+
+
 class GroupItem(QTreeWidgetItem):
     type_ = 'group'
 
