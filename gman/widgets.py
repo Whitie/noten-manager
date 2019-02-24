@@ -481,6 +481,8 @@ class CourseWidget(QtWidgets.QWidget):
     def save(self, on_close=False):
         title = self.title.text()
         trainer = self.trainer.currentText()
+        if not title.strip() or not trainer.strip():
+            return
         start = self.start.date().toPyDate()
         end = self.end.date().toPyDate()
         rating = self.rating.currentText()
@@ -490,5 +492,90 @@ class CourseWidget(QtWidgets.QWidget):
         self.session.add(course)
         self.session.commit()
         self.status.showMessage('Neuer Kurs wurde gespeichert.', 5000)
+        if not on_close:
+            self.saved.emit()
+
+
+class ExperimentWidget(QtWidgets.QWidget):
+
+    saved = QtCore.pyqtSignal()
+
+    def __init__(self, ui_path, session, course=None, parent=None):
+        QtWidgets.QWidget.__init__(self, parent)
+        uic.loadUi(os.path.join(ui_path, 'experiment.ui'), self)
+        self.session = session
+        self.practice = None
+        self.done_on.setDate(QtCore.QDate.currentDate())
+        for c in session.query(db.Course).order_by(db.Course.title).all():
+            self.course.addItem(c.title, QtCore.QVariant(c.pk))
+        if course is not None:
+            self.course.setCurrentText(course.title)
+            self.current_course_id = course.pk
+        else:
+            self.current_course_id = 0
+        self._connect_signals()
+
+    def _connect_signals(self):
+        self.course.currentIndexChanged[int].connect(self._set_course_pk)
+        self.btn_save.clicked.connect(self.save)
+        self.title.textEdited.connect(self._edited)
+        self.weight.valueChanged[str].connect(self._edited)
+        self.done_on.dateChanged.connect(self._edited)
+        self.notes.textChanged.connect(self._edited)
+        self.method.valueChanged[int].connect(self.weights_changed)
+        self.result.valueChanged[int].connect(self.weights_changed)
+        self.docs.valueChanged[int].connect(self.weights_changed)
+
+    def weights_changed(self, val):
+        m = self.method.value()
+        r = self.result.value()
+        d = self.docs.value()
+        w = m + r + d
+        self.weights.setText('{}%'.format(w))
+        if w == 100:
+            self.check_weights.setPixmap(QtGui.QPixmap(':/icons/yes'))
+            self.btn_save.setEnabled(True)
+        else:
+            self.check_weights.setPixmap(QtGui.QPixmap(':/icons/no'))
+            self.btn_save.setDisabled(True)
+
+    def update(self, practice):
+        self.practice = practice
+        self.title.setText(practice.title)
+        d = practice.done_on
+        self.done_on.setDate(QtCore.QDate(d.year, d.month, d.day))
+        self.weight.setValue(practice.weight)
+        self.course.setCurrentText(practice.course.title)
+        self.current_course_id = practice.course.pk
+        self.notes.setPlainText(practice.notes)
+        self.method.setValue(practice.weight_method)
+        self.result.setValue(practice.weight_result)
+        self.docs.setValue(practice.weight_docs)
+
+    def _set_course_pk(self, index):
+        self.current_course_id = self.course.currentData()
+        print('New course id:', self.current_course_id)
+        self.btn_save.setEnabled(True)
+
+    def _edited(self, *args, **kw):
+        if self.title.text():
+            self.btn_save.setEnabled(True)
+
+    def save(self, on_close=False):
+        title = self.title.text().strip()
+        print('Saving experiment:', title)
+        if self.practice is None:
+            self.practice = db.Experiment(title=title)
+        else:
+            self.practice.title = title
+        self.practice.done_on = self.done_on.date().toPyDate()
+        self.practice.weight = self.weight.value()
+        self.practice.course_id = self.current_course_id
+        self.practice.notes = self.notes.toPlainText()
+        self.practice.weight_method = self.method.value()
+        self.practice.weight_result = self.result.value()
+        self.practice.weight_docs = self.docs.value()
+        self.session.add(self.practice)
+        self.session.commit()
         if not on_close:
             self.saved.emit()

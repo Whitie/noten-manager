@@ -33,7 +33,7 @@ class GroupItem(QTreeWidgetItem):
     type_ = 'group'
 
     def __init__(self, parent):
-        QTreeWidgetItem.__init__(self, parent, ['Teilnehmer'])
+        QTreeWidgetItem.__init__(self, parent)
         self.setIcon(0, QIcon(':/icons/group'))
 
 

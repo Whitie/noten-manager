@@ -67,7 +67,7 @@ class HelpDialog(QtWidgets.QDialog):
         self.browser.setSearchPaths([doc_path])
         self.browser.setSource(QtCore.QUrl('index.html'))
         self.btn_close.clicked.connect(self.close)
-        self.btn_home.clicked.connect(self.browser.home)
+        self.btn_home.clicked.connect(self._home)
         self.btn_back.clicked.connect(self.browser.backward)
         self.btn_next.clicked.connect(self.browser.forward)
         self.browser.backwardAvailable.connect(self.btn_back.setEnabled)
@@ -87,3 +87,7 @@ class HelpDialog(QtWidgets.QDialog):
             self.btn_next.setToolTip('')
         current = self.browser.historyTitle(0)
         self.setWindowTitle(current)
+
+    def _home(self):
+        self.browser.home()
+        self.browser.clearHistory()
