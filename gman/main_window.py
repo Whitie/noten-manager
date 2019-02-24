@@ -95,7 +95,11 @@ class GradeManagerMain(QtWidgets.QMainWindow):
         print('Clicked:', item.type_)
 
     def item_double_clicked(self, item, col):
+        if item is None or item.type_ not in ('experiment',):
+            return
         print('Double clicked:', item.type_)
+        if item.type_ == 'experiment':
+            self.edit_practice(item.exp)
 
     def item_right_clicked(self, pos):
         item = self.nav.itemAt(pos)
@@ -248,6 +252,8 @@ class GradeManagerMain(QtWidgets.QMainWindow):
         )
         self.main.addSubWindow(win)
         self.subwindows['experiment'] = win
+        if practice is not None:
+            widget.update(practice)
         win.show()
         self._check_available_actions()
 
