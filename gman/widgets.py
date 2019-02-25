@@ -73,6 +73,7 @@ class CreateDBWizard(QtWidgets.QWizard):
             for course in courses:
                 s.add(db.CourseData(job=job, title=course))
         s.commit()
+        s.close()
         self.status.showMessage('Die Datenbank ist jetzt verwendbar')
         QtWidgets.QMessageBox.information(
             self, 'Datenbank wurde erfolgreich erstellt',
@@ -440,6 +441,7 @@ class CourseWidget(QtWidgets.QWidget):
         self.title.textEdited.connect(self._enable_save)
         self.btn_save.clicked.connect(self.save)
         self.btn_courses.clicked.connect(self.find_course)
+        self.course = None
 
     def _enable_save(self, text):
         if text.strip():
@@ -478,20 +480,35 @@ class CourseWidget(QtWidgets.QWidget):
         dlg = dialogs.CourseDialog(self, self.ui_path, courses)
         dlg.show()
 
+    def update(self, course):
+        self.course = course
+        self.title.setText(course.title)
+        self.trainer.setCurrentText(course.trainer)
+        d = course.start
+        self.start.setDate(QtCore.QDate(d.year, d.month, d.day))
+        d = course.end
+        self.end.setDate(QtCore.QDate(d.year, d.month, d.day))
+        self.rating.setCurrentText(course.rating)
+        self.header.setText('Kurs bearbeiten')
+
     def save(self, on_close=False):
         title = self.title.text()
         trainer = self.trainer.currentText()
         if not title.strip() or not trainer.strip():
             return
-        start = self.start.date().toPyDate()
-        end = self.end.date().toPyDate()
-        rating = self.rating.currentText()
-        course = db.Course(
-            title=title, trainer=trainer, start=start, end=end, rating=rating
-        )
-        self.session.add(course)
+        if self.course is None:
+            self.course = db.Course(title=title)
+            msg = 'Neuer Kurs ({}) wurde erstellt.'
+            self.session.add(self.course)
+        else:
+            self.course.title = title
+            msg = 'Kurs ({}) wurde bearbeitet.'
+        self.course.trainer = trainer
+        self.course.start = self.start.date().toPyDate()
+        self.course.end = self.end.date().toPyDate()
+        self.course.rating = self.rating.currentText()
         self.session.commit()
-        self.status.showMessage('Neuer Kurs wurde gespeichert.', 5000)
+        self.status.showMessage(msg.format(title), 5000)
         if not on_close:
             self.saved.emit()
 
@@ -551,6 +568,7 @@ class ExperimentWidget(QtWidgets.QWidget):
         self.method.setValue(practice.weight_method)
         self.result.setValue(practice.weight_result)
         self.docs.setValue(practice.weight_docs)
+        self.header.setText('Versuch bearbeiten')
 
     def _set_course_pk(self, index):
         self.current_course_id = self.course.currentData()
@@ -566,6 +584,7 @@ class ExperimentWidget(QtWidgets.QWidget):
         print('Saving experiment:', title)
         if self.practice is None:
             self.practice = db.Experiment(title=title)
+            self.session.add(self.practice)
         else:
             self.practice.title = title
         self.practice.done_on = self.done_on.date().toPyDate()
@@ -575,7 +594,6 @@ class ExperimentWidget(QtWidgets.QWidget):
         self.practice.weight_method = self.method.value()
         self.practice.weight_result = self.result.value()
         self.practice.weight_docs = self.docs.value()
-        self.session.add(self.practice)
         self.session.commit()
         if not on_close:
             self.saved.emit()

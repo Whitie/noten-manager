@@ -112,6 +112,7 @@
     </property>
     <addaction name="action_add_students"/>
     <addaction name="action_companies"/>
+    <addaction name="action_edit_course"/>
    </widget>
    <widget class="QMenu" name="menuErstellen">
     <property name="title">
@@ -192,7 +193,7 @@
      <normaloff>:/icons/course-new</normaloff>:/icons/course-new</iconset>
    </property>
    <property name="text">
-    <string>Neuer Kurs</string>
+    <string>Kurs erstellen</string>
    </property>
    <property name="toolTip">
     <string>Neuen Kurs erstellen</string>
@@ -292,6 +293,18 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+S</string>
+   </property>
+  </action>
+  <action name="action_edit_course">
+   <property name="icon">
+    <iconset resource="../resources.qrc">
+     <normaloff>:/icons/edit-course</normaloff>:/icons/edit-course</iconset>
+   </property>
+   <property name="text">
+    <string>Kurs bearbeiten</string>
+   </property>
+   <property name="toolTip">
+    <string>Vorhandenen Kurs bearbeiten</string>
    </property>
   </action>
  </widget>

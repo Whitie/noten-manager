@@ -1,5 +1,6 @@
 <RCC>
   <qresource prefix="icons">
+    <file alias="edit-course">theme/tab-new.svgz</file>
     <file alias="close">theme/dialog-close.svgz</file>
     <file alias="home">theme/go-home.svgz</file>
     <file alias="next">theme/go-next.svgz</file>

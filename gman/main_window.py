@@ -21,7 +21,8 @@ class GradeManagerMain(QtWidgets.QMainWindow):
         QtWidgets.QMainWindow.__init__(self)
         uic.loadUi(os.path.join(UI_PATH, 'main.ui'), self)
         self.setWindowTitle('bbz Notenmanager - {}'.format(getuser()))
-        self.Session = None
+        self._Session = None
+        self.session = None
         self.db_connected = False
         self.subwindows = {}
         self.top = None
@@ -33,9 +34,9 @@ class GradeManagerMain(QtWidgets.QMainWindow):
             if self.handler:
                 self.load_db(self.handler)
         self._connect_actions()
-        self.nav.itemClicked.connect(self.item_clicked)
         self.nav.customContextMenuRequested.connect(self.item_right_clicked)
-        self.nav.itemDoubleClicked.connect(self.item_double_clicked)
+        self.nav.itemClicked.connect(self._check_available_actions)
+        self.nav.itemActivated.connect(self.item_activated)
         self._check_available_actions()
 
     def _connect_actions(self):
@@ -44,17 +45,19 @@ class GradeManagerMain(QtWidgets.QMainWindow):
         self.action_add_students.triggered.connect(self.add_students)
         self.action_companies.triggered.connect(self.edit_companies)
         self.action_new_course.triggered.connect(self.new_course)
+        self.action_edit_course.triggered.connect(self.edit_course)
         self.action_new_practice.triggered.connect(self.edit_practice)
         self.action_save_all.triggered.connect(self.save_all)
         self.action_help.triggered.connect(self.show_help)
 
-    def _check_available_actions(self):
+    def _check_available_actions(self, *args, **kw):
         self.action_add_students.setEnabled(self.db_connected)
         self.action_new_course.setEnabled(self.db_connected)
         self.action_companies.setEnabled(self.db_connected)
         self.action_new_theory.setEnabled(self.has_course)
         self.action_new_practice.setEnabled(self.has_course)
         self.action_save_all.setEnabled(bool(self.subwindows))
+        self.action_edit_course.setEnabled(self.item_selected('course'))
 
     def get_crypto_handler(self):
         dlg = dialogs.CredentialsDialog(self, UI_PATH, self.crypted_db)
@@ -79,27 +82,30 @@ class GradeManagerMain(QtWidgets.QMainWindow):
     def has_course(self):
         if not self.db_connected:
             return False
-        s = self.Session()
-        q = s.query(db.Course)
+        q = self.session.query(db.Course)
         return bool(q.count())
 
     @property
     def has_students(self):
         if not self.db_connected:
             return False
-        s = self.Session()
-        q = s.query(db.Student)
+        q = self.session.query(db.Student)
         return bool(q.count())
 
-    def item_clicked(self, item, col):
-        print('Clicked:', item.type_)
+    def item_selected(self, type_):
+        item = self.nav.currentItem()
+        if item is None or item.type_ != type_:
+            return False
+        return True
 
-    def item_double_clicked(self, item, col):
-        if item is None or item.type_ not in ('experiment',):
+    def item_activated(self, item, col):
+        if item is None:
             return
-        print('Double clicked:', item.type_)
+        print('Activated (doubleclick):', item.type_)
         if item.type_ == 'experiment':
-            self.edit_practice(item.exp)
+            self.edit_practice(practice=item.exp)
+        elif item.type_ == 'course':
+            self.new_course(course=item.course)
 
     def item_right_clicked(self, pos):
         item = self.nav.itemAt(pos)
@@ -110,6 +116,7 @@ class GradeManagerMain(QtWidgets.QMainWindow):
         if item.type_ == 'group':
             menu.addAction(self.action_add_students)
         elif item.type_ == 'course':
+            menu.addAction(self.action_edit_course)
             menu.addAction(self.action_new_theory)
             menu.addAction(self.action_new_practice)
         menu.exec_(self.nav.mapToGlobal(pos))
@@ -122,7 +129,7 @@ class GradeManagerMain(QtWidgets.QMainWindow):
             print('cancel')
             return
         win = QtWidgets.QMdiSubWindow(self)
-        widget = widgets.StudentsWidget(UI_PATH, self.status, self.Session(),
+        widget = widgets.StudentsWidget(UI_PATH, self.status, self.session,
                                         count)
         widget.saved.connect(partial(self.load_db, handler=self.handler))
         widget.saved.connect(
@@ -160,8 +167,8 @@ class GradeManagerMain(QtWidgets.QMainWindow):
                 return
         self.nav.clear()
         self.status.showMessage('Lade {}'.format(self.db_path), 5000)
-        self.Session = db.get_session('sqlite:///{}'.format(self.db_path))
-        s = self.Session()
+        self._Session = db.get_session('sqlite:///{}'.format(self.db_path))
+        self.session = s = self._Session()
         base = s.query(db.BaseData).first()
         self.top = items.BaseItem(self.nav, [base.group_name],
                                   QtGui.QIcon(':/icons/top'))
@@ -213,7 +220,7 @@ class GradeManagerMain(QtWidgets.QMainWindow):
 
     def edit_companies(self):
         win = QtWidgets.QMdiSubWindow(self)
-        widget = widgets.CompaniesWidget(UI_PATH, self.status, self.Session())
+        widget = widgets.CompaniesWidget(UI_PATH, self.status, self.session)
         win.setWidget(widget)
         win.setWindowIcon(QtGui.QIcon(':/icons/add'))
         self.main.addSubWindow(win)
@@ -221,10 +228,16 @@ class GradeManagerMain(QtWidgets.QMainWindow):
         win.show()
         self._check_available_actions()
 
-    def new_course(self):
-        print('new course')
+    def edit_course(self):
+        if not self.item_selected('course'):
+            return
+        item = self.nav.currentItem()
+        self.new_course(course=item.course)
+
+    def new_course(self, checked=False, course=None):
+        print('new/edit course')
         win = QtWidgets.QMdiSubWindow(self)
-        widget = widgets.CourseWidget(UI_PATH, self.status, self.Session())
+        widget = widgets.CourseWidget(UI_PATH, self.status, self.session)
         win.setWidget(widget)
         win.setWindowIcon(QtGui.QIcon(':/icons/course-new'))
         widget.saved.connect(partial(self.load_db, handler=self.handler))
@@ -233,18 +246,20 @@ class GradeManagerMain(QtWidgets.QMainWindow):
         )
         self.main.addSubWindow(win)
         self.subwindows['courses'] = win
+        if course is not None:
+            widget.update(course)
         win.show()
         self._check_available_actions()
 
-    def edit_practice(self, practice=None):
+    def edit_practice(self, checked=False, practice=None):
         print('Add/edit practice')
-        item = self.nav.currentItem()
-        if item is not None and item.type_ == 'course':
+        if self.item_selected('course'):
+            item = self.nav.currentItem()
             course = item.course
         else:
             course = None
         win = QtWidgets.QMdiSubWindow(self)
-        widget = widgets.ExperimentWidget(UI_PATH, self.Session(), course)
+        widget = widgets.ExperimentWidget(UI_PATH, self.session, course)
         win.setWidget(widget)
         widget.saved.connect(partial(self.load_db, handler=self.handler))
         widget.saved.connect(
@@ -264,7 +279,10 @@ class GradeManagerMain(QtWidgets.QMainWindow):
 
     def _subwindow_closed(self, window, name):
         window.close()
-        del self.subwindows[name]
+        try:
+            del self.subwindows[name]
+        except KeyError:
+            pass
 
     def save_all(self, on_close=False):
         for name, subwindow in self.subwindows.items():
