@@ -182,6 +182,8 @@ class GradeManagerMain(QtWidgets.QMainWindow):
         self.top.addChild(group)
         for course in s.query(db.Course).order_by(db.Course.start).all():
             co = items.CourseItem(self.top, course)
+            ov = items.OverviewItem(co)
+            co.addChild(ov)
             theory = items.TheoryItem(
                 co, ['Theorie'], QtGui.QIcon(':/icons/theory')
             )

@@ -29,6 +29,15 @@ class PracticeItem(BaseItem):
     type_ = 'practice'
 
 
+class OverviewItem(QTreeWidgetItem):
+    type_ = 'overview'
+
+    def __init__(self, parent):
+        QTreeWidgetItem.__init__(self, parent, ['Übersicht'])
+        self.course = parent.course
+        self.setIcon(0, QIcon(':/icons/overview'))
+
+
 class GroupItem(QTreeWidgetItem):
     type_ = 'group'
 
