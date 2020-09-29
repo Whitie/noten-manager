@@ -11,7 +11,7 @@ from sqlalchemy.orm import relationship, sessionmaker
 Base = declarative_base()
 
 
-def get_session(connection_string='sqlite:///:memory:', echo=True):
+def get_session(connection_string='sqlite:///:memory:', echo=False):
     engine = sa.create_engine(connection_string, echo=echo)
     return sessionmaker(bind=engine)
 
@@ -88,7 +88,7 @@ class Student(Base):
     pk = sa.Column(sa.Integer, primary_key=True)
     last_name = sa.Column(sa.Unicode(75))
     first_name = sa.Column(sa.Unicode(75))
-    company_id = sa.Column(sa.ForeignKey('companies.pk'))
+    company_id = sa.Column(sa.Integer, sa.ForeignKey('companies.pk'))
     photo = sa.Column(sa.LargeBinary)
     show = sa.Column(sa.Boolean, default=True)
 
@@ -113,7 +113,7 @@ class Experiment(Base):
     done_on = sa.Column(sa.Date)
     weight = sa.Column(sa.Integer, default=100)
     notes = sa.Column(sa.UnicodeText)
-    course_id = sa.Column(sa.ForeignKey('courses.pk'))
+    course_id = sa.Column(sa.Integer, sa.ForeignKey('courses.pk'))
     weight_method = sa.Column(sa.Integer, default=40)
     weight_result = sa.Column(sa.Integer, default=40)
     weight_docs = sa.Column(sa.Integer, default=20)
@@ -133,7 +133,7 @@ class Test(Base):
 
     pk = sa.Column(sa.Integer, primary_key=True)
     subject = sa.Column(sa.Unicode(100))
-    course_id = sa.Column(sa.ForeignKey('courses.pk'))
+    course_id = sa.Column(sa.Integer, sa.ForeignKey('courses.pk'))
     done_on = sa.Column(sa.Date)
     weight = sa.Column(sa.Integer, default=100)
     notes = sa.Column(sa.UnicodeText)
@@ -185,8 +185,8 @@ class PracticeGrade(Base):
     method = sa.Column(sa.Integer, default=None)
     result = sa.Column(sa.Integer, default=None)
     docs = sa.Column(sa.Integer, default=None)
-    experiment_id = sa.Column(sa.ForeignKey('experiments.pk'))
-    student_id = sa.Column(sa.ForeignKey('students.pk'))
+    experiment_id = sa.Column(sa.Integer, sa.ForeignKey('experiments.pk'))
+    student_id = sa.Column(sa.Integer, sa.ForeignKey('students.pk'))
     recorded = sa.Column(sa.DateTime, default=datetime.now)
     recorded_by = sa.Column(sa.Unicode(50), default=getuser)
 
@@ -217,8 +217,8 @@ class TheoryGrade(Base):
 
     pk = sa.Column(sa.Integer, primary_key=True)
     points = sa.Column(sa.Numeric(precision=1))
-    test_id = sa.Column(sa.ForeignKey('tests.pk'))
-    student_id = sa.Column(sa.ForeignKey('students.pk'))
+    test_id = sa.Column(sa.Integer, sa.ForeignKey('tests.pk'))
+    student_id = sa.Column(sa.Integer, sa.ForeignKey('students.pk'))
     recorded = sa.Column(sa.DateTime, default=datetime.now)
     recorded_by = sa.Column(sa.Unicode(50), default=getuser)
 
