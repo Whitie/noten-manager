@@ -290,7 +290,7 @@ class GradeManagerMain(QtWidgets.QMainWindow):
             pass
 
     def save_all(self, on_close=False):
-        for name, subwindow in self.subwindows.items():
+        for name, subwindow in list(self.subwindows.items()):
             if isinstance(subwindow, list):
                 for sub in subwindow:
                     self._save(name, sub, on_close)
