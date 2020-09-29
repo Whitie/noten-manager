@@ -35,8 +35,8 @@ class GradeManagerMain(QtWidgets.QMainWindow):
                 self.load_db(self.handler)
         self._connect_actions()
         self.nav.customContextMenuRequested.connect(self.item_right_clicked)
-        self.nav.itemClicked.connect(self._check_available_actions)
-        self.nav.itemActivated.connect(self.item_activated)
+        self.nav.itemClicked.connect(self.item_clicked)
+        self.nav.itemDoubleClicked.connect(self.item_doubleclicked)
         self._check_available_actions()
 
     def _connect_actions(self):
@@ -98,10 +98,16 @@ class GradeManagerMain(QtWidgets.QMainWindow):
             return False
         return True
 
-    def item_activated(self, item, col):
+    def item_clicked(self, item, col):
         if item is None:
             return
-        print('Activated (doubleclick):', item.type_)
+        self._check_available_actions()
+        print('Item clicked:', item.type_)
+
+    def item_doubleclicked(self, item, col):
+        if item is None:
+            return
+        print('Item doubleclicked:', item.type_)
         if item.type_ == 'experiment':
             self.edit_practice(practice=item.exp)
         elif item.type_ == 'course':
@@ -188,19 +194,16 @@ class GradeManagerMain(QtWidgets.QMainWindow):
                 co, ['Theorie'], QtGui.QIcon(':/icons/theory')
             )
             co.addChild(theory)
-            q = s.query(db.Test).filter(db.Test.course == course).order_by(
-                db.Test.done_on
-            )
-            for t in q.all():
+            for t in course.tests:
                 test = items.TestItem(theory, t)
                 theory.addChild(test)
             practice = items.PracticeItem(
                 co, ['Praxis'], QtGui.QIcon(':/icons/practice')
             )
             co.addChild(practice)
-            q = s.query(db.Experiment).filter(
-                db.Experiment.course == course).order_by(db.Experiment.done_on)
-            for e in q.all():
+            print('EXPs:', list(course.experiments))
+            for e in course.experiments:
+                print('EXP:', e)
                 exp = items.ExperimentItem(practice, e)
                 practice.addChild(exp)
             self.top.addChild(co)
