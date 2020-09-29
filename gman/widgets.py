@@ -529,7 +529,7 @@ class ExperimentWidget(QtWidgets.QWidget):
             self.course.setCurrentText(course.title)
             self.current_course_id = course.pk
         else:
-            self.current_course_id = 0
+            self.current_course_id = self.course.currentData()
         self._connect_signals()
 
     def _connect_signals(self):
