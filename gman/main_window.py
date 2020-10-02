@@ -110,8 +110,6 @@ class GradeManagerMain(QtWidgets.QMainWindow):
         print('Item doubleclicked:', item.type_)
         if item.type_ == 'experiment':
             self.edit_practice(practice=item.exp)
-        elif item.type_ == 'course':
-            self.new_course(course=item.course)
 
     def item_right_clicked(self, pos):
         item = self.nav.itemAt(pos)
@@ -195,13 +193,13 @@ class GradeManagerMain(QtWidgets.QMainWindow):
             )
             co.addChild(theory)
             for t in course.tests:
+                print('TEST:', t)
                 test = items.TestItem(theory, t)
                 theory.addChild(test)
             practice = items.PracticeItem(
                 co, ['Praxis'], QtGui.QIcon(':/icons/practice')
             )
             co.addChild(practice)
-            print('EXPs:', list(course.experiments))
             for e in course.experiments:
                 print('EXP:', e)
                 exp = items.ExperimentItem(practice, e)
